@@ -10,8 +10,17 @@
     Function5Message DB 10,13, '5. Thoat$'
     
     KyTu DB ? ; khoi tao bien ky tu khong co gia tri ban dau
+    ;khoi tao cac bien de chuyen tu he 10 sang he 16
+    InputPrompt1 DB 10,13, 'Nhap : $'
+    crlf db 13, 10, '$'
+    a dw 0
+    base_dec dw 10
+    base_bin dw 2 
+    base_hex dw 16 
+    str db '0123456789ABCDEF'
+
     ; Cac bien tinh so Fibonacci
-    InputPrompt DB 10,13, 'Nhap n: $'
+    InputPrompt4 DB 10,13, 'Nhap n: $'
     RESULT DB 13,10,13,10, 'Chuoi so Fibonacci$'
     F DB 0
     S DB 1
@@ -133,8 +142,52 @@ f1 Endp
 
 f2 Proc
     ; Xu ly chuc nang 2
-    ; ...
+    LEA DX, InputPrompt1
+    MOV AH, 9
+    INT 21H    
+loop_input: 
+    mov ah, 1
+    int 21h
+    cmp al, 13
+    je end_input
+    sub al, '0'
+    xor ah, ah
+    push ax
+    mov ax, a
+    mul base_dec
+    mov a, ax
+    pop ax
+    add n, ax
+    jmp loop_input
+    
+end_input:
+    mov ah, 9
+    lea dx, crlf
+    int 21h
+    
+    mov ax, n   
+    
+     mov cx, 0
+Loop_output:
+    mov dx, 0
+    div base_hex
+    push dx
+    inc cx
+    cmp ax, 0
+    jg Loop_output 
+    
+    mov ah, 2
+Show:
+   
+    pop si
+    add si, (str)
+    mov dl, [si]
+    int 21h
+    Loop Show
+    
     RET
+    
+    JMP Main
 f2 Endp
 
 f3 Proc
@@ -149,7 +202,7 @@ f4 Proc
     ; 0 = 0 ,1 = 1,0 + 1 = 1,1 + 1 = 2,2 + 1 = 3,3 + 2 = 5
     ; FIRST = 0, SECOND = 1, SUM = FIRST + SECOND, FIRST = SECOND, SECOND = SUM
     ; Hien thong bao nhap
-    MOV DX, OFFSET InputPrompt
+    MOV DX, OFFSET InputPrompt4
     MOV AH, 9
     INT 21H
 
