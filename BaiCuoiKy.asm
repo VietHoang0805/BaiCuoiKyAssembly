@@ -10,10 +10,11 @@
     Function5Message DB 10,13, '5. Thoat$'
     
     KyTu DB ? ; khoi tao bien ky tu khong co gia tri ban dau
+    
     ;khoi tao cac bien de chuyen tu he 10 sang he 16
-    InputPrompt1 DB 10,13, 'Nhap : $'
+    InputPrompt2 DB 10,13, 'Nhap : $'
     crlf db 13, 10, '$'
-    a dw 0
+    A dw 0
     base_dec dw 10
     base_bin dw 2 
     base_hex dw 16 
@@ -32,10 +33,6 @@ MAIN Proc
     MOV AX, @DATA
     MOV DS, AX
     ; Dat lai cac gia tri cho phan chuc nang fibonacci
-    MOV F, 0
-    MOV S, 1
-    MOV SUM, 0
-    MOV N, 0
     
     ; Hien thi dong thong bao Menu
     LEA DX, MenuMessage
@@ -142,22 +139,27 @@ f1 Endp
 
 f2 Proc
     ; Xu ly chuc nang 2
-    LEA DX, InputPrompt1
-    MOV AH, 9
-    INT 21H    
+    ; Hien ra thong bao nhap
+    LEA DX, InputPrompt2
+    MOV AH,9
+    INT 21H
+    
 loop_input: 
-    mov ah, 1
-    int 21h
-    cmp al, 13
-    je end_input
-    sub al, '0'
-    xor ah, ah
-    push ax
-    mov ax, a
-    mul base_dec
-    mov a, ax
-    pop ax
-    add n, ax
+    mov AH, 1
+    int 21H
+    
+    ; Kiem tra co phai la ki tu enter hay khong
+    cmp AL, 13
+    je end_input ; Jump end
+    
+    sub AL, '0' ; Chuyen doi ky tu so tu ASCII sang gia tri nguyen
+    xor AH, AH ; Xoa thanh ghi AH
+    push ax ; Day gia tri AX vao ngan xep
+    mov ax, A ; Gan gia tri A vao thanh ghi AX
+    mul base_dec ;Nhan gia tri cua AX voi gia tri cua bien base_dec. Ket qua duoc luu trong thanh ghi DX:AX
+    mov A, AX
+    pop AX 
+    add A, AX
     jmp loop_input
     
 end_input:
@@ -165,7 +167,7 @@ end_input:
     lea dx, crlf
     int 21h
     
-    mov ax, n   
+    mov ax, A   
     
      mov cx, 0
 Loop_output:
@@ -202,6 +204,12 @@ f4 Proc
     ; 0 = 0 ,1 = 1,0 + 1 = 1,1 + 1 = 2,2 + 1 = 3,3 + 2 = 5
     ; FIRST = 0, SECOND = 1, SUM = FIRST + SECOND, FIRST = SECOND, SECOND = SUM
     ; Hien thong bao nhap
+    ; Gan lai gia tri de luu gia tri vao lan bam tiep theo
+    MOV F, 0
+    MOV S, 1
+    MOV SUM, 0
+    MOV N, 0
+    
     MOV DX, OFFSET InputPrompt4
     MOV AH, 9
     INT 21H
@@ -215,7 +223,7 @@ INPUT:
     INT 21H
     CMP AL, 13 ; Neu Input == Enter
     JE NEXT    ; Jump Equal to Next
-    SUB AL, 30H
+    SUB AL, '0'
     MOV AH, 0
     MOV CX, AX ; CX = AX
     MOV AX, N  ; AX = N
@@ -258,7 +266,7 @@ L1:
     DIV BX
     PUSH DX
     MOV DX, 0   ; DX = 0
-    MOV AH, 0   ; AX AH 000000 AL = QUOTIENT
+    MOV AH, 0   ; AX AH 000000 AL = Thuong so
     INC CX      ; Tang CX len 1
     CMP AX, 0
     JNE L1
