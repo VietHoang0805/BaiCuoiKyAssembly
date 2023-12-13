@@ -14,7 +14,6 @@
     ; khoi tao cac bien de chuyen tu he 10 sang he 2
     InputPrompt1	DB 10, 13, 'Nhap : $'
     Resultf1 DB 10, 13, 'So da nhap dang nhi phan: $'
-    str1 DB 5 dup ('$'); nhap vao 1 chuoi toi da 5 ky tu
         
     ; khoi tao cac bien de chuyen tu he 10 sang he 16
     InputPrompt2 DB 10,13, 'Nhap : $'
@@ -151,54 +150,38 @@ MAIN Endp
 f1 Proc
     ; Xu ly chuc nang 1
     ; ...
-	LEA DX,	InputPrompt1
+    LEA DX,	InputPrompt1
 	MOV AH, 9
 	INT 21H
 	
-	MOV AH, 10
-    LEA DX, str1 ; nhap chuoi str  
-    INT 21h 
-    
-   ;Chuyen chuoi thanh so:
-    MOV CL, [str1+1] ; lay so ky tu cua chuoi ( vd :cl=2 )
-    LEA SI, str1+2 ; tro den dia chi cua ky tu dau tien cua chuoi str
-    MOV AX, 0 ; ax=0 123
-    MOV BX, 10 ;bx=10 ;he so nhan
-     
-    thapphan:; chuyen chuoi thanh so     123;0*10+1 1*10+2; 12*10+3
-        MUL BX  ;nhan 10
-        MOV DL, [SI] ; dl='1'
-        SUB DL, '0'; dl=1
-        ADD AX, DX  ;ax=ax+dx
-        INC SI ;increase tang si 1 down vi
-        LOOP thapphan   
-
-   ;Chuyen thanh so nhi phan: 10- 1010
-    MOV CL, 2 ; he so chia  
-    
-    nhiphan: ;chuyen so thap phan sang nhi phan va day cac so vao ngan xep
-        MOV AH, 0  ;phan du =0
-        DIV CL ; chia ax cho 2
-        PUSH AX ; day ax vao ngan xep (al+ah)
-        CMP AL, 0 ;so sanh thuong#0 tiep tuc chia
-        JNE nhiphan  ;jump not eual
-   
-    MOV AH, 9
-    LEA DX, Resultf1;in ra thb1  
-    INT 21h 
-    
-    MOV AH, 2
-    Inra:
-        POP DX  ;lay tung phan tu trong ngan xep
-        CMP DX, '#'
-        JE Done  ;jump equal
-        MOV DL, DH  ;lay duoc so tu ngan xep   :1 0 1 0
-        ADD DL, '0' ; convert tu 1 so sang ky tu '1' '0' '1' '0'
-        INT 21h
-        JMP Inra
-    Done:
-        MOV AH, 4Ch
-        INT 21h 
+	MOV AH,1
+            INT 21H
+            ; AL in the form ascii code
+            SUB AL,48  ; AL=53-48=5
+            MOV AH,0 ; AX = 05
+            MOV BX,2
+            MOV DX,0 ; DIV
+            MOV CX,0
+            
+        again:
+            DIV BX  ; Divisor ax= divideend
+            PUSH DX
+            MOV AH,0
+            INC CX
+            CMP AX,0
+            JNE again
+            
+            MOV AH,9
+            LEA DX,Resultf1
+            INT 21H
+       disp:    
+            POP DX
+            ADD DX,48
+            MOV AH,2
+            INT 21H
+            
+            LOOP disp
+            
 
     RET
     
@@ -207,6 +190,10 @@ f1 Endp
 
 f2 Proc
     ; Xu ly chuc nang 2
+    MOV C,0
+    MOV base_dec, 10
+    MOV base_bin, 2 
+    MOV base_hex, 16
     ; Hien ra thong bao nhap
     LEA DX, InputPrompt2
     MOV AH,9
@@ -262,6 +249,11 @@ f2 Endp
 
 f3 Proc
     ; Xu ly chuc nang 3
+    MOV a,0
+    MOV b,0
+    MOV tong,0   
+    MOV hieu,0          
+    MOV tich,0
     mov ah,9
     lea dx,tb1
     int 21h         
