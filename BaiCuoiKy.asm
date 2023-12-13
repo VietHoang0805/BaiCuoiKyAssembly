@@ -11,20 +11,38 @@
     
     KyTu DB ? ; khoi tao bien ky tu khong co gia tri ban dau
     
-    ;khoi tao cac bien de chuyen tu he 10 sang he 16
+    ; khoi tao cac bien de chuyen tu he 10 sang he 2
+    InputPrompt1	DB 10, 13, 'Nhap : $'
+    Resultf1 DB 10, 13, 'So da nhap dang nhi phan: $'
+    str1 DB 5 dup ('$'); nhap vao 1 chuoi toi da 5 ky tu
+        
+    ; khoi tao cac bien de chuyen tu he 10 sang he 16
     InputPrompt2 DB 10,13, 'Nhap : $'
     crlf db 13, 10, '$'
-    A dw 0
+    C dw 0
     base_dec dw 10
     base_bin dw 2 
     base_hex dw 16 
-    str db '0123456789ABCDEF'
-
+    str2 db '0123456789ABCDEF'
+    
+    ; khoi tao cac bien de tinh tong,hieu,tich 2 so nho hon 10
+    a db ?
+    b db ?
+    tong db ?   
+    hieu db ?          
+    tich db ?
+    tb1 db 10,13, 'Nhap a: $'
+    tb2 db 'Nhap b: $'
+    tb3 db 10,13, 'Tong: $'     
+    tb4 db 10,13, 'Hieu: $'     
+    tb5 db 10,13, 'Tich: $'
+    xdvdd db 13,10,'$'
+    
     ; Cac bien tinh so Fibonacci
     InputPrompt4 DB 10,13, 'Nhap n: $'
     RESULT DB 13,10,13,10, 'Chuoi so Fibonacci$'
-    F DB 0
-    S DB 1
+    First DB 0
+    Second DB 1
     SUM DB ?
     N DW ?     
     
@@ -133,8 +151,58 @@ MAIN Endp
 f1 Proc
     ; Xu ly chuc nang 1
     ; ...
+	LEA DX,	InputPrompt1
+	MOV AH, 9
+	INT 21H
+	
+	MOV AH, 10
+    LEA DX, str1 ; nhap chuoi str  
+    INT 21h 
+    
+   ;Chuyen chuoi thanh so:
+    MOV CL, [str1+1] ; lay so ky tu cua chuoi ( vd :cl=2 )
+    LEA SI, str1+2 ; tro den dia chi cua ky tu dau tien cua chuoi str
+    MOV AX, 0 ; ax=0 123
+    MOV BX, 10 ;bx=10 ;he so nhan
+     
+    thapphan:; chuyen chuoi thanh so     123;0*10+1 1*10+2; 12*10+3
+        MUL BX  ;nhan 10
+        MOV DL, [SI] ; dl='1'
+        SUB DL, '0'; dl=1
+        ADD AX, DX  ;ax=ax+dx
+        INC SI ;increase tang si 1 down vi
+        LOOP thapphan   
+
+   ;Chuyen thanh so nhi phan: 10- 1010
+    MOV CL, 2 ; he so chia  
+    
+    nhiphan: ;chuyen so thap phan sang nhi phan va day cac so vao ngan xep
+        MOV AH, 0  ;phan du =0
+        DIV CL ; chia ax cho 2
+        PUSH AX ; day ax vao ngan xep (al+ah)
+        CMP AL, 0 ;so sanh thuong#0 tiep tuc chia
+        JNE nhiphan  ;jump not eual
+   
+    MOV AH, 9
+    LEA DX, Resultf1;in ra thb1  
+    INT 21h 
+    
+    MOV AH, 2
+    Inra:
+        POP DX  ;lay tung phan tu trong ngan xep
+        CMP DX, '#'
+        JE Done  ;jump equal
+        MOV DL, DH  ;lay duoc so tu ngan xep   :1 0 1 0
+        ADD DL, '0' ; convert tu 1 so sang ky tu '1' '0' '1' '0'
+        INT 21h
+        JMP Inra
+    Done:
+        MOV AH, 4Ch
+        INT 21h 
 
     RET
+    
+    JMP Main
 f1 Endp
 
 f2 Proc
@@ -155,11 +223,11 @@ loop_input:
     sub AL, '0' ; Chuyen doi ky tu so tu ASCII sang gia tri nguyen
     xor AH, AH ; Xoa thanh ghi AH
     push ax ; Day gia tri AX vao ngan xep
-    mov ax, A ; Gan gia tri A vao thanh ghi AX
+    mov ax, C ; Gan gia tri A vao thanh ghi AX
     mul base_dec ;Nhan gia tri cua AX voi gia tri cua bien base_dec. Ket qua duoc luu trong thanh ghi DX:AX
-    mov A, AX
+    mov C, AX
     pop AX 
-    add A, AX
+    add C, AX
     jmp loop_input
     
 end_input:
@@ -167,7 +235,7 @@ end_input:
     lea dx, crlf
     int 21h
     
-    mov ax, A   
+    mov ax, C   
     
      mov cx, 0
 Loop_output:
@@ -182,7 +250,7 @@ Loop_output:
 Show:
    
     pop si
-    add si, (str)
+    add si, (str2)
     mov dl, [si]
     int 21h
     Loop Show
@@ -194,8 +262,92 @@ f2 Endp
 
 f3 Proc
     ; Xu ly chuc nang 3
-    ; ...
+    mov ah,9
+    lea dx,tb1
+    int 21h         
+              
+    ;Nhap a
+    mov ah,1
+    int 21h
+    sub al,30h
+    mov a,al
+       
+    ; Xuong dong
+    mov ah,9
+    lea dx,xdvdd
+    int 21h
+    
+    ; In ra tb2
+    mov ah,9
+    lea dx,tb2
+    int 21h   
+
+    ; Nhap b            
+    mov ah,1
+    int 21h
+    sub al,30h
+    mov b,al             
+    
+    ; tinh tong
+    mov al,a
+    add al,b
+    mov tong,al  
+    
+    ; tinh hieu
+    mov al,a
+    sub al,b
+    mov hieu,al  
+    
+    ; tinh tich
+    mov al,a    
+    mov bl,b
+    imul bl
+    mov tich,al 
+    
+    ; Xuong dong
+    mov ah,9
+    lea dx,xdvdd
+    int 21h    
+    
+    ; in ra tb3
+    mov ah,9
+    lea dx,tb3
+    int 21h     
+    
+    ; in ra ket qua        
+    mov ah,2       
+    mov dl,tong       
+    
+    ; inc dl - tang dl 1 don vi
+    add dl,30h
+    int 21h  
+    
+    ; in ra tb4
+    mov ah,9
+    lea dx,tb4
+    int 21h
+    
+    ; in ra ket qua        
+    mov ah,2       
+    mov dl,hieu  
+    ; inc dl - tang dl 1 don vi
+    add dl,30h
+    int 21h      
+    
+    ; in ra tb5
+    mov ah,9
+    lea dx,tb5
+    int 21h
+    
+    ; in ra ket qua        
+    mov ah,2       
+    mov dl,tich  
+    ; inc dl - tang dl 1 don vi
+    add dl,30h
+    int 21h
     RET
+    
+    JMP Main
 f3 Endp
 
 f4 Proc
@@ -205,8 +357,8 @@ f4 Proc
     ; FIRST = 0, SECOND = 1, SUM = FIRST + SECOND, FIRST = SECOND, SECOND = SUM
     ; Hien thong bao nhap
     ; Gan lai gia tri de luu gia tri vao lan bam tiep theo
-    MOV F, 0
-    MOV S, 1
+    MOV First, 0
+    MOV Second, 1
     MOV SUM, 0
     MOV N, 0
     
@@ -239,7 +391,7 @@ NEXT:
     INT 21H
 
     MOV CX, N ; CX = N
-    L:
+L:
     PUSH CX
 
     MOV DL, 10
@@ -250,8 +402,8 @@ NEXT:
     MOV AH, 2
     INT 21H
 
-    MOV BL, F  ; F = 0
-    ADD BL, S  ; BL = BL + S
+    MOV BL, First  ; F = 0
+    ADD BL, Second  ; BL = BL + S
     MOV SUM, BL; SUM = BL
 
     ; Code ket qua
@@ -278,11 +430,11 @@ L2:
     LOOP L2
     ; Dong code Ouput ket thuc
 
-    MOV BL, S ; BL = S
-    MOV F, BL ; F = BL
+    MOV BL, Second ; BL = Second
+    MOV First, BL ; First = BL
 
     MOV BL, SUM; BL = SUM
-    MOV S, BL ; S = BL
+    MOV Second, BL ; S = BL
 
     POP CX
     LOOP L
