@@ -336,7 +336,7 @@ f4 Proc
     MOV SUM, 0
     MOV N, 0
     
-    MOV DX, OFFSET InputPrompt4
+    LEA DX, InputPrompt4
     MOV AH, 9
     INT 21H
 
@@ -348,12 +348,12 @@ INPUT:
     MOV AH, 1 ; Lay Input
     INT 21H
     CMP AL, 13 ; Neu Input == Enter
-    JE NEXT    ; Jump Equal to Next
+    JE NEXT    ; Jump Equal Bang se tro den Next
     SUB AL, '0'
     MOV AH, 0
     MOV CX, AX ; CX = AX
     MOV AX, N  ; AX = N
-    MUL BL     ; AX = AX * BL
+    MUL BL     ; AX = AL * BL
     ADD AX, CX ; AX = AX + CX
     MOV N, AX  ; N = AX
     JMP INPUT
@@ -389,8 +389,8 @@ L:
     MOV BX, 10
     MOV CX, 0
 L1:
-    DIV BX
-    PUSH DX
+    DIV BX     ; Chia AX = AX : BX du o DX
+    PUSH DX     ; Day DX vao ngan xep
     MOV DX, 0   ; DX = 0
     MOV AH, 0   ; AX AH 000000 AL = Thuong so
     INC CX      ; Tang CX len 1
@@ -399,7 +399,7 @@ L1:
     MOV AH, 2
 L2:
     POP DX
-    ADD DX, '0'
+    ADD DX, '0'  ; Chuyen ky tu thanh so
     INT 21H
     LOOP L2
     ; Dong code Ouput ket thuc
