@@ -29,11 +29,13 @@
     a db ?
     b db ?
     tong db ?   
-    hieu db ?          
+    hieu db ?
+    tich db ?          
     tb1 db 10,13, 'Nhap a: $'
     tb2 db 'Nhap b: $'
     tb3 db 10,13, 'Tong: $'     
-    tb4 db 10,13, 'Hieu: $'     
+    tb4 db 10,13, 'Hieu: $'
+    tb5 db 10,13, 'Tich: $'     
     xdvdd db 13,10,'$'
     
     
@@ -149,13 +151,13 @@ MAIN Endp
 ; Cac ham chuc nang
 f1 Proc
             ; Xu ly chuc nang 1
-            ; ...
+            ; ... 
             LEA DX,	InputPrompt1
         	MOV AH, 9
         	INT 21H
         	
         	; Nhap ki tu
-        	MOV AH,0
+        	MOV AH,1
             INT 21H
             ; CHuyen Al ve dang ASCII
             SUB AL,'0'  ; chuyen ki tu nhap vao la 1 so
@@ -180,8 +182,7 @@ f1 Proc
             MOV AH,2 ; Hien thi ki tu ra man hinh
             INT 21H
             
-            LOOP Hienthi_1
-            
+            LOOP Hienthi_1       
 
     RET
     
@@ -250,8 +251,7 @@ f2 Endp
 
 f3 Proc
     ; Xu ly chuc nang 3
-    ;In ra tb1
-    mov ah,9
+     mov ah,9
     lea dx,tb1
     int 21h         
               
@@ -287,6 +287,11 @@ f3 Proc
     sub al,b
     mov hieu,al  
     
+    ; tinh tich
+    mov al,a    
+    mov bl,b
+    imul bl
+    mov tich,al 
     
     ; Xuong dong
     mov ah,9
@@ -312,14 +317,25 @@ f3 Proc
     int 21h
     
     ; in ra ket qua        
-    mov AH,2       
-    mov DL,hieu  
+    mov ah,2       
+    mov dl,hieu  
     ; inc dl - tang dl 1 don vi
-    ADD DL,30h
-    INT 21H
+    add dl,30h
+    int 21h      
     
-
+    ; in ra tb5
+    mov ah,9
+    lea dx,tb5
+    int 21h
+    
+    ; in ra ket qua        
+    mov ah,2       
+    mov dl,tich  
+    ; inc dl - tang dl 1 don vi
+    add dl,30h
+    int 21h     
     RET
+
     
     JMP Main
 f3 Endp
