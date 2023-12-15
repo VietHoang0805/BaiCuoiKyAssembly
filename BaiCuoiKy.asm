@@ -1,4 +1,4 @@
-.MODEL Small
+.MODEL Large
 .STACK 100h
 .DATA
     MenuMessage DB 10,13, 'Chuong trinh Assembly Menu$'
@@ -14,32 +14,34 @@
     ; khoi tao cac bien de chuyen tu he 10 sang he 2
     InputPrompt1	DB 10, 13, 'Nhap : $'
     Resultf1 DB 10, 13, 'So da nhap dang nhi phan: $'
+    hai dw 2
         
     ; khoi tao cac bien de chuyen tu he 10 sang he 16
     InputPrompt2 DB 10,13, 'Nhap : $'
-    crlf db 13, 10, '$'
+    enter db 13, 10, '$'
     C dw 0
-    base_dec dw 10
-    base_bin dw 2 
-    base_hex dw 16 
+    muoi dw 10 
+    muoisau dw 16
+    ; Bang ma chua ki tu Hex tuong ung 
     str2 db '0123456789ABCDEF'
     
-    ; khoi tao cac bien de tinh tong,hieu,tich 2 so nho hon 10
+    ; khoi tao cac bien cho viec tinh tong cac so nhap vao
     a db ?
     b db ?
-    tong db ?   
-    hieu db ?          
-    tich db ?
+    t db ?   
+    h db ?          
+    x db ?
     tb1 db 10,13, 'Nhap a: $'
     tb2 db 'Nhap b: $'
     tb3 db 10,13, 'Tong: $'     
     tb4 db 10,13, 'Hieu: $'     
     tb5 db 10,13, 'Tich: $'
     xdvdd db 13,10,'$'
+
     
     ; Cac bien tinh so Fibonacci
     InputPrompt4 DB 10,13, 'Nhap n: $'
-    RESULT DB 13,10,13,10, 'Chuoi so Fibonacci$'
+    Resultf4 DB 13,10,13,10, 'Chuoi so Fibonacci$'
     First DB 0
     Second DB 1
     SUM DB ?
@@ -148,39 +150,39 @@ MAIN Endp
 
 ; Cac ham chuc nang
 f1 Proc
-    ; Xu ly chuc nang 1
-    ; ...
-    LEA DX,	InputPrompt1
-	MOV AH, 9
-	INT 21H
-	
-	MOV AH,1
+            ; Xu ly chuc nang 1
+            ; ...
+            LEA DX,	InputPrompt1
+        	MOV AH, 9
+        	INT 21H
+        	
+        	; Nhap ki tu
+        	MOV AH,0
             INT 21H
-            ; AL in the form ascii code
-            SUB AL,48  ; AL=53-48=5
-            MOV AH,0 ; AX = 05
-            MOV BX,2
-            MOV DX,0 ; DIV
-            MOV CX,0
+            ; CHuyen Al ve dang ASCII
+            SUB AL,'0'  ; chuyen ki tu nhap vao la 1 so
+            MOV AH,0  
+            MOV DX,0 ; Cho DX = 0 tuc la dua so du = 0
+            MOV CX,0 ; Cho CX = 0 de dem so luong chu so
             
-        again:
-            DIV BX  ; Divisor ax= divideend
-            PUSH DX
-            MOV AH,0
-            INC CX
-            CMP AX,0
-            JNE again
+       NhiPhan:
+            DIV hai  ; Day la phep chia 16 bit nen AX = AX : 2 du o DX
+            PUSH DX ; Day so du vao ngan xep
+            MOV AH,0 ; Gan AH = 0
+            INC CX   ; Tang CX len 1 don vi
+            CMP AX,0  ; So sanh AX = 0 thi se dung vong lap
+            JNE NhiPhan
             
             MOV AH,9
             LEA DX,Resultf1
             INT 21H
-       disp:    
-            POP DX
-            ADD DX,48
-            MOV AH,2
+       Hienthi_1:    
+            POP DX   ; Lay so du ra khoi ngan xep
+            ADD DX,'0'; Chuyen doi so du chua o DX tu dang so nguyen sang ki tu ASCII tuong ung vi du 0 co gia tri la 48
+            MOV AH,2 ; Hien thi ki tu ra man hinh
             INT 21H
             
-            LOOP disp
+            LOOP Hienthi_1
             
 
     RET
@@ -190,57 +192,58 @@ f1 Endp
 
 f2 Proc
     ; Xu ly chuc nang 2
+    ; Gan lai cac gia tri tu dau
     MOV C,0
-    MOV base_dec, 10
-    MOV base_bin, 2 
-    MOV base_hex, 16
+    MOV muoi, 10 
+    MOV muoisau, 16
     ; Hien ra thong bao nhap
     LEA DX, InputPrompt2
     MOV AH,9
     INT 21H
     
-loop_input: 
-    mov AH, 1
-    int 21H
+Vonglap_dauvao: 
+    ; Nhap ki tu
+    MOV AH, 1
+    INT 21H
     
     ; Kiem tra co phai la ki tu enter hay khong
-    cmp AL, 13
-    je end_input ; Jump end
+    CMP AL, 13
+    JE ketthuc_dauvao ; Jump end
+    ; Chuyen doi ky tu so sang so va tich luy so vao bien C
+    SUB AL, '0' ; Chuyen doi ky tu so tu ASCII sang gia tri nguyen
+    MOV AH,0 ; Xoa thanh ghi AH
+    PUSH AX ; Day gia tri AX vao ngan xep
+    MOV AX, C ; Gan gia tri C vao thanh ghi AX, AX = 0
+    MUL muoi ;AX = AX * 10; ket qua duoc luu vao o AX,DX cao o DX, thap o AX
+    MOV C, AX
+    POP AX  ; Lay gia tri tu so nguyen ban dau tu ngan xep de tiep tuc vong lap
+    ADD C, AX ; C = C + AX
+    JMP Vonglap_dauvao
     
-    sub AL, '0' ; Chuyen doi ky tu so tu ASCII sang gia tri nguyen
-    xor AH, AH ; Xoa thanh ghi AH
-    push ax ; Day gia tri AX vao ngan xep
-    mov ax, C ; Gan gia tri A vao thanh ghi AX
-    mul base_dec ;Nhan gia tri cua AX voi gia tri cua bien base_dec. Ket qua duoc luu trong thanh ghi DX:AX
-    mov C, AX
-    pop AX 
-    add C, AX
-    jmp loop_input
+ketthuc_dauvao:
+    MOV AH, 9
+    LEA DX, enter
+    INT 21h
     
-end_input:
-    mov ah, 9
-    lea dx, crlf
-    int 21h
+    MOV AX, C   
     
-    mov ax, C   
+    MOV CX, 0
+Vonglap_daura:
+    MOV DX, 0
+    DIV muoisau ; AX = C / 16 du o DX
+    PUSH DX ; Day phan du vao trong ngan xep
+    INC CX ; Tang bien dem CX
+    CMP AX, 0
+    JNE Vonglap_daura ; Jump Not Equal Tiep tuc vong lap neu AX # 0
     
-     mov cx, 0
-Loop_output:
-    mov dx, 0
-    div base_hex
-    push dx
-    inc cx
-    cmp ax, 0
-    jg Loop_output 
-    
-    mov ah, 2
-Show:
-   
-    pop si
-    add si, (str2)
-    mov dl, [si]
-    int 21h
-    Loop Show
+    MOV AH, 2
+Hienthi_2:
+    ; Thanh ghi SI duoc su dung viec xu ly voi cac chuoi ki tu trong str 2
+    POP SI ; Gan gia tri trong ngan xep vao thanh ghi SI
+    ADD SI, <str2>; giup SI truy cap vao chuoi cua str2 boi vi co dau <>
+    MOV DL, [SI]
+    INT 21h
+    Loop Hienthi_2
     
     RET
     
@@ -249,11 +252,7 @@ f2 Endp
 
 f3 Proc
     ; Xu ly chuc nang 3
-    MOV a,0
-    MOV b,0
-    MOV tong,0   
-    MOV hieu,0          
-    MOV tich,0
+    ;In ra tb1
     mov ah,9
     lea dx,tb1
     int 21h         
@@ -283,18 +282,18 @@ f3 Proc
     ; tinh tong
     mov al,a
     add al,b
-    mov tong,al  
+    mov t,al  
     
     ; tinh hieu
     mov al,a
     sub al,b
-    mov hieu,al  
+    mov h,al  
     
     ; tinh tich
     mov al,a    
     mov bl,b
     imul bl
-    mov tich,al 
+    mov x,al 
     
     ; Xuong dong
     mov ah,9
@@ -308,7 +307,7 @@ f3 Proc
     
     ; in ra ket qua        
     mov ah,2       
-    mov dl,tong       
+    mov dl,t       
     
     ; inc dl - tang dl 1 don vi
     add dl,30h
@@ -321,22 +320,11 @@ f3 Proc
     
     ; in ra ket qua        
     mov ah,2       
-    mov dl,hieu  
-    ; inc dl - tang dl 1 don vi
-    add dl,30h
-    int 21h      
-    
-    ; in ra tb5
-    mov ah,9
-    lea dx,tb5
-    int 21h
-    
-    ; in ra ket qua        
-    mov ah,2       
-    mov dl,tich  
+    mov dl,h  
     ; inc dl - tang dl 1 don vi
     add dl,30h
     int 21h
+
     RET
     
     JMP Main
@@ -378,7 +366,7 @@ INPUT:
     ; Nhap Code ket thuc
 
 NEXT:
-    LEA DX, RESULT
+    LEA DX, Resultf4
     MOV AH, 9
     INT 21H
 
@@ -417,7 +405,7 @@ L1:
     MOV AH, 2
 L2:
     POP DX
-    ADD DX, 48
+    ADD DX, '0'
     INT 21H
     LOOP L2
     ; Dong code Ouput ket thuc
@@ -429,7 +417,7 @@ L2:
     MOV Second, BL ; S = BL
 
     POP CX
-    LOOP L
+LOOP L
 
 RET
     
