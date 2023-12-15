@@ -1,11 +1,11 @@
-.MODEL Large
-.STACK 100h
+.MODEL Small
+.STACK 100
 .DATA
     MenuMessage DB 10,13, 'Chuong trinh Assembly Menu$'
     Choose DB 10,13,'Vui long chon chuc nang : $'
     Function1Message DB 10,13, '1. Chuyen doi he 10 sang he 2$'
     Function2Message DB 10,13, '2. Chuyen doi he 10 sang he 16$'
-    Function3Message DB 10,13, '3. Tinh tong,hieu,tich 2 so nho hon 10$'
+    Function3Message DB 10,13, '3. Tinh tong,hieu 2 so nho hon 10$'
     Function4Message DB 10,13, '4. Hien thi day so Fibonacci n phan tu dau tien$'
     Function5Message DB 10,13, '5. Thoat$'
     
@@ -28,16 +28,14 @@
     ; khoi tao cac bien cho viec tinh tong cac so nhap vao
     a db ?
     b db ?
-    t db ?   
-    h db ?          
-    x db ?
+    tong db ?   
+    hieu db ?          
     tb1 db 10,13, 'Nhap a: $'
     tb2 db 'Nhap b: $'
     tb3 db 10,13, 'Tong: $'     
     tb4 db 10,13, 'Hieu: $'     
-    tb5 db 10,13, 'Tich: $'
     xdvdd db 13,10,'$'
-
+    
     
     ; Cac bien tinh so Fibonacci
     InputPrompt4 DB 10,13, 'Nhap n: $'
@@ -282,18 +280,13 @@ f3 Proc
     ; tinh tong
     mov al,a
     add al,b
-    mov t,al  
+    mov tong,al  
     
     ; tinh hieu
     mov al,a
     sub al,b
-    mov h,al  
+    mov hieu,al  
     
-    ; tinh tich
-    mov al,a    
-    mov bl,b
-    imul bl
-    mov x,al 
     
     ; Xuong dong
     mov ah,9
@@ -307,7 +300,7 @@ f3 Proc
     
     ; in ra ket qua        
     mov ah,2       
-    mov dl,t       
+    mov dl,tong       
     
     ; inc dl - tang dl 1 don vi
     add dl,30h
@@ -319,11 +312,12 @@ f3 Proc
     int 21h
     
     ; in ra ket qua        
-    mov ah,2       
-    mov dl,h  
+    mov AH,2       
+    mov DL,hieu  
     ; inc dl - tang dl 1 don vi
-    add dl,30h
-    int 21h
+    ADD DL,30h
+    INT 21H
+    
 
     RET
     
